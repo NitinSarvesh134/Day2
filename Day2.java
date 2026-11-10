@@ -12,8 +12,7 @@ public class Day2 {
         long numbersPerThread = 1000000;
 
         // Create an ExecutorService with a pool of 1000 threads
-        ExecutorService executor =
-                Executors.newFixedThreadPool(numberOfThreads);
+        ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
 
         // Store the Futures returned by the submitted tasks
         ArrayList<Future<Long>> futures = new ArrayList<>();
@@ -37,7 +36,7 @@ public class Day2 {
 
                     // Add all numbers in the assigned range
                     for (long j = start; j <= end; j++) {
-                        sum += j;
+                        sum++;
                     }
 
                     // Return this task's result
