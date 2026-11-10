@@ -1,6 +1,9 @@
+import java.util.concurrent.*;
+import java.util.ArrayList;
 public class Day2 {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args)
+            throws InterruptedException, ExecutionException {
 
         // Start measuring execution time
         long startTime = System.nanoTime();
@@ -8,24 +11,25 @@ public class Day2 {
         int numberOfThreads = 1000;
         long numbersPerThread = 1000000;
 
-        // Array to store all 1000 threads
-        Thread[] threads = new Thread[numberOfThreads];
+        // Create an ExecutorService with a pool of 1000 threads
+        ExecutorService executor =
+                Executors.newFixedThreadPool(numberOfThreads);
 
-        // Array to store each thread's result
-        long[] results = new long[numberOfThreads];
+        // Store the Futures returned by the submitted tasks
+        ArrayList<Future<Long>> futures = new ArrayList<>();
 
-        // Create and start all 1000 threads
+        // Submit 1000 Callable tasks
         for (int i = 0; i < numberOfThreads; i++) {
 
             final int threadIndex = i;
 
-            // Create a Runnable task
-            Runnable task = new Runnable() {
+            // Create a Callable task that returns a Long
+            Callable<Long> task = new Callable<Long>() {
 
 
-                public void run() {
+                public Long call() {
 
-                    // Calculate this thread's assigned range
+                    // Calculate this task's assigned range
                     long start = (long) threadIndex * numbersPerThread + 1;
                     long end = start + numbersPerThread - 1;
 
@@ -36,28 +40,29 @@ public class Day2 {
                         sum += j;
                     }
 
-                    // Store this thread's result
-                    results[threadIndex] = sum;
+                    // Return this task's result
+                    return sum;
                 }
             };
 
-            // Create a thread using the Runnable task
-            threads[i] = new Thread(task);
+            // Submit the Callable and save its Future
+            Future<Long> future = executor.submit(task);
 
-            // Start the thread
-            threads[i].start();
+            futures.add(future);
         }
 
-        // Wait for all threads to finish
-        for (int i = 0; i < numberOfThreads; i++) {
-            threads[i].join();
-        }
+        // Stop accepting new tasks
+        executor.shutdown();
 
-        // Add all thread results together
+        // Add all the returned results together
         long total = 0;
 
-        for (int i = 0; i < numberOfThreads; i++) {
-            total += results[i];
+        for (int i = 0; i < futures.size(); i++) {
+
+            // Get the result (waits if the task is not finished)
+            long result = futures.get(i).get();
+
+            total += result;
         }
 
         System.out.println("Final total: " + total);
